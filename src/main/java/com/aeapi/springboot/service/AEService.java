@@ -6,6 +6,6 @@ import com.aeapi.springboot.models.Task;
 
 public interface AEService {
     
-    public int create(List<String> tasks);
+    public String create(List<String> tasks);
 
 }

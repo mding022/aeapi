@@ -18,7 +18,7 @@ import com.aeapi.springboot.service.AEService;
 @Service
 public class AEServiceImpl implements AEService{
     
-    public int create(List<String> images) {
+    public String create(List<String> images) {
         List<Task> tasks = new ArrayList<Task>();
         Task testingTask = new Task();
         testingTask.setImages(images);
@@ -27,7 +27,7 @@ public class AEServiceImpl implements AEService{
         int er = env();
         if(er != 0) {
             System.out.println("Could not modify templater-optins.json file.");
-            return -1;
+            return "error";
         }
         Task t = new Task();
         t.setImages(images);
@@ -38,7 +38,10 @@ public class AEServiceImpl implements AEService{
 
         runner(new String[] {"ae/./templater.sh", "-v", "2024", "-m"});
         
-        return -1;
+        String name = "myvideo";
+        upload("Render_Comp 1_00002",name);
+
+        return "https://miller.publit.io/file/"+name+".mp4";
     }
 
     private static int env() {
@@ -129,4 +132,31 @@ public class AEServiceImpl implements AEService{
 
         return -1;
     }
+
+    private static int upload(String fp, String name) {
+        String[] command = {
+            "python", 
+            "ae/upload.py", 
+            "\""+fp+"\"", 
+            name
+        };
+        
+       // log.info(" transcribe inputAudioFile: " + inputAudioFile + "  outputPath: " + outputPath);
+        
+        //Run process
+        ProcessBuilder processBuilder = new ProcessBuilder(command);
+        try {
+        	Process p = processBuilder.start(); 
+        	BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream(), "UTF-8"));
+        	String line = null;
+        	while((line = br.readLine()) != null) {
+        		System.out.println(line);
+        	}
+            return 0;
+        } catch (IOException e) {
+        	return -1;
+        }
+
+    }
+
 }

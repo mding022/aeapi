@@ -21,10 +21,10 @@ public class AEAPIController {
 		aeService = new AEServiceImpl();
 		
 		String[] files = {"1.png", "2.jpeg", "3.png", "4.png", "5.jpeg", "6.jpeg", "7.png", "8.png", "9.png", "10.png", "11.png"};
-		
-		aeService.create(List.of(files));
 
-		return "running scripts.";
+		String response = aeService.create(List.of(files));
+
+		return response;
 	}
 
 }
