@@ -1,15 +1,11 @@
 from publitio import PublitioAPI
+import sys
 
-publitio_api = PublitioAPI('kPSwwra8kybjtiaH3qL6', '9ZDZTtu5J9i6GA9p3wbidJuRWscsokMi')
-publitio_api.create_file(file=open('path/to/file', 'rb'),
-                         title='My title',
-                         description='My description')
+path = sys.argv[0]
+name = sys.argv[1]
 
-# Note that the file must be opened for binary reading.
-# The publitio_api.create_file function will not close the file.
-# Therefore, what you will probably want to do most of the time is:
-
-with open('path/to/file.png', 'rb') as f:
-    publitio_api.create_file(file=open('path/to/file', 'rb'),
-                             title='My title',
-                             description='My description')
+publitio_api = PublitioAPI('9r6BXVgQ91jqqvXlvyJB', '7VWkrq52G1wQMrgRrexvfmfcJmpcqBB8')
+with open(path, 'rb') as f:
+    publitio_api.create_file(file=open(path, 'rb'),
+                             title=name,
+                             description='Uploaded by aeapi')
