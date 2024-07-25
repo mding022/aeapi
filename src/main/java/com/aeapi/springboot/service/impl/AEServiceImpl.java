@@ -7,10 +7,14 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.aeapi.springboot.models.Task;
 import com.aeapi.springboot.service.AEService;
@@ -37,11 +41,8 @@ public class AEServiceImpl implements AEService{
         er = writeToFile("ae/temp.tsv", images.size(), tl);
 
         runner(new String[] {"ae/./templater.sh", "-v", "2024", "-m"});
-        
-        String name = "myvideo";
-        upload("Render_Comp 1_00002",name);
 
-        return "https://miller.publit.io/file/"+name+".mp4";
+        return "done";
     }
 
     private static int env() {
@@ -59,7 +60,7 @@ public class AEServiceImpl implements AEService{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        File f = new File("ae/Template.aep");
+        File f = new File("ae/transition.aep");
         if(f.exists()) {
             System.out.println("project file absolute path: " + f.getAbsolutePath());
             lines.set(3, ", \"aep\"                   : \""+f.getAbsolutePath()+"\"");
@@ -157,6 +158,14 @@ public class AEServiceImpl implements AEService{
         	return -1;
         }
 
+    }
+
+    public void saveFile(String uploadDir, MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new IOException("Failed to store empty file " + file.getOriginalFilename());
+        }
+        Path path = Paths.get(uploadDir);
+        Files.copy(file.getInputStream(), path);
     }
 
 }
