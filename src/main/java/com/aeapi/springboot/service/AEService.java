@@ -13,4 +13,5 @@ public interface AEService {
 
     public void saveFile(String uploadDir, MultipartFile file) throws IOException;
 
+    public void ffmpeg(String input, String output);
 }

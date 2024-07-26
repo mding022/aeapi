@@ -168,4 +168,46 @@ public class AEServiceImpl implements AEService{
         Files.copy(file.getInputStream(), path);
     }
 
+    public void ffmpeg(String inputFilePath, String outputFilePath) {
+        String[] command = {
+            "ffmpeg",
+            "-i", inputFilePath,
+            "-filter_complex", "[0]reverse[r];[0][r]concat=n=2:v=1:a=0,fps=50",
+            outputFilePath
+    };
+
+    ProcessBuilder processBuilder = new ProcessBuilder(command);
+    
+    try {
+        // Start the process
+        Process process = processBuilder.start();
+
+        // Read the process output (optional, for debugging)
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+            
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.println(line);
+            }
+            
+            while ((line = errorReader.readLine()) != null) {
+                System.err.println(line);
+            }
+        }
+
+        // Wait for the process to complete
+        int exitCode = process.waitFor();
+        if (exitCode == 0) {
+            System.out.println("Command executed successfully.");
+            File f = new File(inputFilePath);
+            f.delete();
+        } else {
+            System.err.println("Command failed with exit code " + exitCode);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    }
+
 }

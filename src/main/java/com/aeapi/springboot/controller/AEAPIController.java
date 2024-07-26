@@ -56,10 +56,13 @@ public class AEAPIController {
 		aeService = new AEServiceImpl();
 
 		try {
-
-            aeService.saveFile("ae/images/1.jpg", image1);
-            aeService.saveFile("ae/images/2.jpg", image2);
-			String[] files = {"1.jpg", "2.jpg"};
+			String one = image1.getOriginalFilename();
+			String two = image2.getOriginalFilename();
+			System.out.println(one);
+			System.out.println(two);
+            aeService.saveFile("ae/images/"+one, image1);
+            aeService.saveFile("ae/images/"+two, image2);
+			String[] files = {one, two};
 
 			aeService.create(List.of(files));
 			Path def = Paths.get("ae/output/Render_Comp 1_00002.mp4");
@@ -67,10 +70,12 @@ public class AEAPIController {
 			Path ran = Paths.get("ae/output/"+randomName+".mp4");
 			Files.move(def, ran);
 
-			Path png = Paths.get("ae/images/1.jpg");
-			Path png2 = Paths.get("ae/images/2.jpg");
+			Path png = Paths.get("ae/images/"+one);
+			Path png2 = Paths.get("ae/images/"+two);
 			Files.delete(png); Files.delete(png2);
-			return getVideo(randomName+".mp4");
+			aeService.ffmpeg("ae/output/"+randomName+".mp4", "ae/output/"+randomName+".gif");
+			System.out.println("File: " + randomName+".gif");
+			return getGif(randomName+".gif");
 
         } catch (IOException e) {
 			System.out.println("Error taking files");
@@ -105,4 +110,29 @@ public class AEAPIController {
         }
     }
 
+	public ResponseEntity<Resource> getGif(String filename) {
+        try {
+            Path imagePath = Paths.get(VIDEO_DIR).resolve(filename).normalize();
+            if (Files.exists(imagePath) && Files.isReadable(imagePath)) {
+                Resource resource = new UrlResource(imagePath.toUri());
+
+                if (resource.exists() && resource.isReadable()) {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"");
+                    headers.add(HttpHeaders.CONTENT_TYPE, "image/gif");
+
+                    return ResponseEntity.ok()
+                                         .headers(headers)
+                                         .contentLength(resource.contentLength())
+                                         .body(resource);
+                } else {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 }
