@@ -75,7 +75,7 @@ public class AEAPIController {
 			Files.delete(png); Files.delete(png2);
 			aeService.ffmpeg("ae/output/"+randomName+".mp4", "ae/output/"+randomName+".gif");
 			System.out.println("File: " + randomName+".gif");
-			return getGif(randomName+".gif");
+			return aeService.getGif(randomName+".gif");
 
         } catch (IOException e) {
 			System.out.println("Error taking files");
@@ -83,56 +83,5 @@ public class AEAPIController {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
 
-	private static final String VIDEO_DIR = "ae/output"; // Change this to your actual folder path
-    public ResponseEntity<Resource> getVideo(String filename) {
-        try {
-            Path videoPath = Paths.get(VIDEO_DIR).resolve(filename).normalize();
-            if (Files.exists(videoPath) && Files.isReadable(videoPath)) {
-                Resource resource = new UrlResource(videoPath.toUri());
-
-                if (resource.exists() && resource.isReadable()) {
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"");
-                    headers.add(HttpHeaders.CONTENT_TYPE, "video/mp4");
-
-                    return ResponseEntity.ok()
-                                         .headers(headers)
-                                         .contentLength(resource.contentLength())
-                                         .body(resource);
-                } else {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-                }
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
-
-	public ResponseEntity<Resource> getGif(String filename) {
-        try {
-            Path imagePath = Paths.get(VIDEO_DIR).resolve(filename).normalize();
-            if (Files.exists(imagePath) && Files.isReadable(imagePath)) {
-                Resource resource = new UrlResource(imagePath.toUri());
-
-                if (resource.exists() && resource.isReadable()) {
-                    HttpHeaders headers = new HttpHeaders();
-                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"");
-                    headers.add(HttpHeaders.CONTENT_TYPE, "image/gif");
-
-                    return ResponseEntity.ok()
-                                         .headers(headers)
-                                         .contentLength(resource.contentLength())
-                                         .body(resource);
-                } else {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-                }
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
-    }
+	
 }
