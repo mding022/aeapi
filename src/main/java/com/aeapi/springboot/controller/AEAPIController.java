@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,42 +39,35 @@ public class AEAPIController {
 		return "Success";
 	}
 
-	@GetMapping("/createtbi")
-	public String createtbi() {
-		aeService = new AEServiceImpl();
-		
-		String[] files = {"1.png", "2.jpeg", "3.png", "4.png", "5.jpeg", "6.jpeg", "7.png", "8.png", "9.png", "10.png", "11.png"};
-
-
-		String response = aeService.create(List.of(files));
-
-		return response;
-	}
-
 	@PostMapping("/create")
-	public ResponseEntity<Resource> create(@RequestParam("image1") MultipartFile image1, 
-                                         @RequestParam("image2") MultipartFile image2) {
+	public ResponseEntity<Resource> create(@RequestParam("images") List<MultipartFile> images, @RequestParam("template") String template) {
         
 		aeService = new AEServiceImpl();
 
-		try {
-			String one = image1.getOriginalFilename();
-			String two = image2.getOriginalFilename();
-			System.out.println(one);
-			System.out.println(two);
-            aeService.saveFile("ae/images/"+one, image1);
-            aeService.saveFile("ae/images/"+two, image2);
-			String[] files = {one, two};
+		try{int image_count = aeService.getTemplates().get(template);System.out.println("count images: " + image_count);}
+		catch(Exception e) {
+			System.out.println("Template not found!");
+			return null;
+		}
 
-			aeService.create(List.of(files));
+		try {
+			List<String> files = new ArrayList<String>();
+
+			for(MultipartFile image : images) {
+				aeService.saveFile("ae/images/"+image.getOriginalFilename(), image);
+				files.add(image.getOriginalFilename());
+			}
+			
+
+			aeService.create(files);
 			Path def = Paths.get("ae/output/Render_Comp 1_00002.mp4");
 			String randomName = String.valueOf(ThreadLocalRandom.current().nextInt(1,1000000000));
 			Path ran = Paths.get("ae/output/"+randomName+".mp4");
 			Files.move(def, ran);
 
-			Path png = Paths.get("ae/images/"+one);
-			Path png2 = Paths.get("ae/images/"+two);
-			Files.delete(png); Files.delete(png2);
+			for(String file : files) {
+				Files.delete(Paths.get("ae/images/"+file));
+			}
 			aeService.ffmpeg("ae/output/"+randomName+".mp4", "ae/output/"+randomName+".gif");
 			System.out.println("File: " + randomName+".gif");
 			return aeService.getGif(randomName+".gif");
@@ -82,6 +77,11 @@ public class AEAPIController {
         }
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
+
+	@GetMapping("templates")
+	public Map<String, Integer> getTemplates() {
+		return new AEServiceImpl().getTemplates();
+	}
 
 	
 }

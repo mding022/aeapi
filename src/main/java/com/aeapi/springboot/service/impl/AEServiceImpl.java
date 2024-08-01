@@ -11,7 +11,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -266,6 +268,19 @@ public class AEServiceImpl implements AEService{
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    public Map<String, Integer> getTemplates() {
+        try{BufferedReader br = new BufferedReader(new FileReader("ae/templates_list.tsv"));
+        Map<String, Integer> lines = new HashMap<String, Integer>();
+        String line;
+        while((line=br.readLine()) != null) {
+            String[] temp = line.split(" ");
+            lines.put(temp[0], Integer.valueOf(temp[1]));
+        }
+        br.close();
+        return lines;}
+        catch(Exception e) {System.out.println("Error getting template list");return null;}
     }
 
 
