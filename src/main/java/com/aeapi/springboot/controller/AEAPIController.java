@@ -15,6 +15,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,8 +44,8 @@ public class AEAPIController {
 	public ResponseEntity<Resource> create(@RequestParam("images") List<MultipartFile> images, @RequestParam("template") String template) {
         
 		aeService = new AEServiceImpl();
-
-		try{int image_count = aeService.getTemplates().get(template);System.out.println("count images: " + image_count);}
+		int image_count = 0;
+		try{image_count = aeService.getTemplates().get(template);System.out.println("count images: " + image_count);}
 		catch(Exception e) {
 			System.out.println("Template not found!");
 			return null;
@@ -59,7 +60,7 @@ public class AEAPIController {
 			}
 			
 
-			aeService.create(files);
+			aeService.create(files, template, image_count);
 			Path def = Paths.get("ae/output/Render_Comp 1_00002.mp4");
 			String randomName = String.valueOf(ThreadLocalRandom.current().nextInt(1,1000000000));
 			Path ran = Paths.get("ae/output/"+randomName+".mp4");

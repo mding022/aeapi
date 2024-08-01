@@ -12,7 +12,7 @@ import com.aeapi.springboot.models.Task;
 
 public interface AEService {
     
-    public String create(List<String> images);
+    public String create(List<String> images, String template, int image_count);
 
     public void saveFile(String uploadDir, MultipartFile file) throws IOException;
 

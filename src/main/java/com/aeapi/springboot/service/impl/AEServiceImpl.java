@@ -29,13 +29,13 @@ import com.aeapi.springboot.service.AEService;
 @Service
 public class AEServiceImpl implements AEService{
     
-    public String create(List<String> images) {
+    public String create(List<String> images, String template, int img_count) {
         List<Task> tasks = new ArrayList<Task>();
         Task testingTask = new Task();
         testingTask.setImages(images);
         tasks.add(testingTask);
 
-        int er = env();
+        int er = env(template);
         if(er != 0) {
             System.out.println("Could not modify templater-optins.json file.");
             return "error";
@@ -52,7 +52,7 @@ public class AEServiceImpl implements AEService{
         return "done";
     }
 
-    private static int env() {
+    private static int env(String template) {
         List<String> lines = new ArrayList<>();
         File json = new File("templater-options.json");
         if(!json.exists()) {
@@ -67,7 +67,7 @@ public class AEServiceImpl implements AEService{
         } catch (IOException e) {
             e.printStackTrace();
         }
-        File f = new File("ae/transition.aep");
+        File f = new File("ae/"+template);
         if(f.exists()) {
             System.out.println("project file absolute path: " + f.getAbsolutePath());
             lines.set(3, ", \"aep\"                   : \""+f.getAbsolutePath()+"\"");
@@ -139,32 +139,6 @@ public class AEServiceImpl implements AEService{
         }
 
         return -1;
-    }
-
-    private static int upload(String fp, String name) {
-        String[] command = {
-            "python", 
-            "ae/upload.py", 
-            "\""+fp+"\"", 
-            name
-        };
-        
-       // log.info(" transcribe inputAudioFile: " + inputAudioFile + "  outputPath: " + outputPath);
-        
-        //Run process
-        ProcessBuilder processBuilder = new ProcessBuilder(command);
-        try {
-        	Process p = processBuilder.start(); 
-        	BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream(), "UTF-8"));
-        	String line = null;
-        	while((line = br.readLine()) != null) {
-        		System.out.println(line);
-        	}
-            return 0;
-        } catch (IOException e) {
-        	return -1;
-        }
-
     }
 
     public void saveFile(String uploadDir, MultipartFile file) throws IOException {
