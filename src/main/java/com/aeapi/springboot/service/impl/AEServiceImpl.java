@@ -11,8 +11,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -209,5 +216,72 @@ public class AEServiceImpl implements AEService{
         e.printStackTrace();
     }
     }
+
+    private static final String VIDEO_DIR = "ae/output"; // Change this to your actual folder path
+    public ResponseEntity<Resource> getVideo(String filename) {
+        try {
+            Path videoPath = Paths.get(VIDEO_DIR).resolve(filename).normalize();
+            if (Files.exists(videoPath) && Files.isReadable(videoPath)) {
+                Resource resource = new UrlResource(videoPath.toUri());
+
+                if (resource.exists() && resource.isReadable()) {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"");
+                    headers.add(HttpHeaders.CONTENT_TYPE, "video/mp4");
+
+                    return ResponseEntity.ok()
+                                         .headers(headers)
+                                         .contentLength(resource.contentLength())
+                                         .body(resource);
+                } else {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+	public ResponseEntity<Resource> getGif(String filename) {
+        try {
+            Path imagePath = Paths.get(VIDEO_DIR).resolve(filename).normalize();
+            if (Files.exists(imagePath) && Files.isReadable(imagePath)) {
+                Resource resource = new UrlResource(imagePath.toUri());
+
+                if (resource.exists() && resource.isReadable()) {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"");
+                    headers.add(HttpHeaders.CONTENT_TYPE, "image/gif");
+
+                    return ResponseEntity.ok()
+                                         .headers(headers)
+                                         .contentLength(resource.contentLength())
+                                         .body(resource);
+                } else {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+                }
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    public Map<String, Integer> getTemplates() {
+        try{BufferedReader br = new BufferedReader(new FileReader("ae/templates_list.tsv"));
+        Map<String, Integer> lines = new HashMap<String, Integer>();
+        String line;
+        while((line=br.readLine()) != null) {
+            String[] temp = line.split(" ");
+            lines.put(temp[0], Integer.valueOf(temp[1]));
+        }
+        br.close();
+        return lines;}
+        catch(Exception e) {System.out.println("Error getting template list");return null;}
+    }
+
 
 }
