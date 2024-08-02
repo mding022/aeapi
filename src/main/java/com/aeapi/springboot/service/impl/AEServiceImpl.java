@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -30,6 +31,8 @@ import com.aeapi.springboot.service.AEService;
 public class AEServiceImpl implements AEService{
     
     public String create(List<String> images, String template, int img_count) {
+        //clean directory
+        emptyFolder("ae/output");
         List<Task> tasks = new ArrayList<Task>();
         Task testingTask = new Task();
         testingTask.setImages(images);
@@ -45,7 +48,7 @@ public class AEServiceImpl implements AEService{
         List<Task> tl = new ArrayList<Task>();
         tl.add(t);
 
-        er = writeToFile("ae/temp.tsv", images.size(), tl);
+        er = writeToFile("ae/temp.tsv", img_count, tl);
 
         runner(new String[] {"ae/./templater.sh", "-v", "2024", "-m"});
 
@@ -223,12 +226,12 @@ public class AEServiceImpl implements AEService{
             Path imagePath = Paths.get(VIDEO_DIR).resolve(filename).normalize();
             if (Files.exists(imagePath) && Files.isReadable(imagePath)) {
                 Resource resource = new UrlResource(imagePath.toUri());
-
+                
                 if (resource.exists() && resource.isReadable()) {
                     HttpHeaders headers = new HttpHeaders();
                     headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"");
                     headers.add(HttpHeaders.CONTENT_TYPE, "image/gif");
-
+                    
                     return ResponseEntity.ok()
                                          .headers(headers)
                                          .contentLength(resource.contentLength())
@@ -257,5 +260,23 @@ public class AEServiceImpl implements AEService{
         catch(Exception e) {System.out.println("Error getting template list");return null;}
     }
 
+    private static void emptyFolder(String folderPath) {
+        Path directory = Paths.get(folderPath);
+
+        try (Stream<Path> files = Files.list(directory)) {
+            files.forEach(file -> {
+                try {
+                    Files.delete(file);
+                    System.out.println("Deleted file: " + file.toString());
+                } catch (IOException e) {
+                    System.err.println("Unable to delete file: " + file.toString());
+                    e.printStackTrace();
+                }
+            });
+        } catch (IOException e) {
+            System.err.println("An error occurred while trying to empty the folder.");
+            e.printStackTrace();
+        }
+    }
 
 }
