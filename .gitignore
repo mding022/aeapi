@@ -1,4 +1,3 @@
-ae/output/
-ae/logs/
-ae/temp.tsv
-ae/TEMPLATER_JOB_DETAILS/
+ae/output/*.gif
+ae/output/*.mp4
+ae/logs/*.log
