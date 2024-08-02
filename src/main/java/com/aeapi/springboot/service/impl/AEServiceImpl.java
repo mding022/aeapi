@@ -27,6 +27,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.aeapi.springboot.models.Task;
 import com.aeapi.springboot.service.AEService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class AEServiceImpl implements AEService{
     
@@ -40,7 +43,7 @@ public class AEServiceImpl implements AEService{
 
         int er = env(template);
         if(er != 0) {
-            System.out.println("Could not modify templater-optins.json file.");
+            log.error("Could not access templater-json file");
             return "error";
         }
         Task t = new Task();
@@ -59,7 +62,7 @@ public class AEServiceImpl implements AEService{
         List<String> lines = new ArrayList<>();
         File json = new File("templater-options.json");
         if(!json.exists()) {
-            System.out.println("Templater options file does not exist!");
+            log.warn("templater-options json file does not exist in ~/ae");
             return -1;
         }
         try (BufferedReader br = new BufferedReader(new FileReader("templater-options.json"))) {
@@ -72,7 +75,7 @@ public class AEServiceImpl implements AEService{
         }
         File f = new File("ae/"+template);
         if(f.exists()) {
-            System.out.println("project file absolute path: " + f.getAbsolutePath());
+            log.info("Found matching project file: {}", f.getAbsolutePath());
             lines.set(3, ", \"aep\"                   : \""+f.getAbsolutePath()+"\"");
             f = new File("ae/logs");
             lines.set(1, "  \"log_location\"          : \""+f.getAbsolutePath()+"\"");
@@ -125,17 +128,7 @@ public class AEServiceImpl implements AEService{
     public static int runner(String[] command) {
         try {
             Process process = new ProcessBuilder(command).start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-            BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-            while ((line = errorReader.readLine()) != null) {
-                System.err.println(line);
-            }
             int exitCode = process.waitFor();
-            System.out.println("Exit Code: " + exitCode);
             return exitCode;
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -166,32 +159,17 @@ public class AEServiceImpl implements AEService{
         // Start the process
         Process process = processBuilder.start();
 
-        // Read the process output (optional, for debugging)
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-             BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-            
-            String line;
-            while ((line = reader.readLine()) != null) {
-                System.out.println(line);
-            }
-            
-            while ((line = errorReader.readLine()) != null) {
-                System.err.println(line);
-            }
-        }
-
         // Wait for the process to complete
         int exitCode = process.waitFor();
         if (exitCode == 0) {
-            System.out.println("Command executed successfully.");
+            log.info("Successfully generated gif");
             File f = new File(inputFilePath);
             f.delete();
         } else {
             System.err.println("Command failed with exit code " + exitCode);
         }
     } catch (Exception e) {
-        e.printStackTrace();
-    }
+        e.printStackTrace();}
     }
 
     private static final String VIDEO_DIR = "ae/output"; // Change this to your actual folder path
@@ -267,14 +245,14 @@ public class AEServiceImpl implements AEService{
             files.forEach(file -> {
                 try {
                     Files.delete(file);
-                    System.out.println("Deleted file: " + file.toString());
+                    log.info("Cleaning output directory.");
                 } catch (IOException e) {
-                    System.err.println("Unable to delete file: " + file.toString());
+                    log.error("Error with file permissions; unable to delete file");
                     e.printStackTrace();
                 }
             });
         } catch (IOException e) {
-            System.err.println("An error occurred while trying to empty the folder.");
+            log.error("An error occured when running the file deletion process");
             e.printStackTrace();
         }
     }

@@ -23,7 +23,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.aeapi.springboot.service.AEService;
 import com.aeapi.springboot.service.impl.AEServiceImpl;
 
+import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
+
 @RestController
+@Slf4j
 public class AEAPIController {
 
 	@Autowired
@@ -42,9 +46,10 @@ public class AEAPIController {
 		int image_count = 0;
 		try{image_count = aeService.getTemplates().get(template);System.out.println("count images: " + image_count);}
 		catch(Exception e) {
-			System.out.println("Template not found!");
+			log.error("Unsuccessful request, template not found");
 			return null;
 		}
+		log.info("Received request to create mp4 using template {} with {} inputs.", template, image_count);
 		List<String> files = new ArrayList<String>();
 		try {
 			
@@ -64,7 +69,6 @@ public class AEAPIController {
 			for(String file : files) {
 				Files.delete(Paths.get("ae/images/"+file));
 			}
-			System.out.println("File: " + randomName+".mp4");
 			return aeService.getVideo(randomName+".mp4");
 
         } catch (IOException e) {
@@ -88,9 +92,10 @@ public class AEAPIController {
 		int image_count = 0;
 		try{image_count = aeService.getTemplates().get(template);System.out.println("count images: " + image_count);}
 		catch(Exception e) {
-			System.out.println("Template not found!");
+			log.error("Unsuccessful request, template not found");
 			return null;
 		}
+		log.info("Received request to create gif using template {} with {} inputs.", template, image_count);
 		List<String> files = new ArrayList<String>();
 		try {
 			
