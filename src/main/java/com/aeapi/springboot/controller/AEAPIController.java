@@ -44,7 +44,7 @@ public class AEAPIController {
         
 		aeService = new AEServiceImpl();
 		int image_count = 0;
-		try{image_count = aeService.getTemplates().get(template);System.out.println("count images: " + image_count);}
+		try{image_count = aeService.getTemplates().get(template);}
 		catch(Exception e) {
 			log.error("Unsuccessful request, template not found");
 			return null;
@@ -72,7 +72,7 @@ public class AEAPIController {
 			return aeService.getVideo(randomName+".mp4");
 
         } catch (IOException e) {
-			System.out.println("Error taking files");
+			log.error("Unexpected error occured during the process.");
 			for(String file : files) {
 				try {
 					Files.delete(Paths.get("ae/images/"+file));
@@ -90,7 +90,7 @@ public class AEAPIController {
         
 		aeService = new AEServiceImpl();
 		int image_count = 0;
-		try{image_count = aeService.getTemplates().get(template);System.out.println("count images: " + image_count);}
+		try{image_count = aeService.getTemplates().get(template);}
 		catch(Exception e) {
 			log.error("Unsuccessful request, template not found");
 			return null;
@@ -116,10 +116,10 @@ public class AEAPIController {
 				Files.delete(Paths.get("ae/images/"+file));
 			}
 			aeService.ffmpeg("ae/output/"+randomName+".mp4", "ae/output/"+randomName+".gif");
-			System.out.println("File: " + randomName+".gif");
+			log.info("File: {}", randomName+".gif");
 			return aeService.getGif(randomName+".gif");
         } catch (IOException e) {
-			System.out.println("Error taking files");
+			log.error("Unexpected error occured during the process.");
 			for(String file : files) {
 				try {
 					Files.delete(Paths.get("ae/images/"+file));

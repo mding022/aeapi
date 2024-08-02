@@ -166,7 +166,7 @@ public class AEServiceImpl implements AEService{
             File f = new File(inputFilePath);
             f.delete();
         } else {
-            System.err.println("Command failed with exit code " + exitCode);
+            log.error("FFmpeg instance failed @ AEServiceImpl.ffmpeg");
         }
     } catch (Exception e) {
         e.printStackTrace();}
@@ -235,7 +235,7 @@ public class AEServiceImpl implements AEService{
         }
         br.close();
         return lines;}
-        catch(Exception e) {System.out.println("Error getting template list");return null;}
+        catch(Exception e) {log.warn("Error getting template list. Returning null");return null;}
     }
 
     private static void emptyFolder(String folderPath) {
