@@ -146,15 +146,17 @@ public class AEServiceImpl implements AEService{
     }
 
     public void ffmpeg(String inputFilePath, String outputFilePath) {
+
         String[] command = {
             "ffmpeg",
             "-i", inputFilePath,
-            "-filter_complex", "[0]reverse[r];[0][r]concat=n=2:v=1:a=0,fps=50",
+            "-vf", 
+            "fps=30,scale=150:-1:flags=lanczos,split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse",
             outputFilePath
     };
 
     ProcessBuilder processBuilder = new ProcessBuilder(command);
-    
+
     try {
         // Start the process
         Process process = processBuilder.start();
@@ -209,6 +211,7 @@ public class AEServiceImpl implements AEService{
                     HttpHeaders headers = new HttpHeaders();
                     headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"");
                     headers.add(HttpHeaders.CONTENT_TYPE, "image/gif");
+                    headers.add(HttpHeaders.SERVER, "success");
                     
                     return ResponseEntity.ok()
                                          .headers(headers)
