@@ -53,7 +53,7 @@ public class AEServiceImpl implements AEService{
 
         er = writeToFile("ae/temp.tsv", img_count, tl);
 
-        runner(new String[] {"ae/./templater.sh", "-v", "2024", "-m"});
+        runner(new String[] {"ae/./templater.sh", "-v", "2024", "-ui"});
 
         return "done";
     }
