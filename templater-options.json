@@ -1,7 +1,7 @@
 {
   "log_location"          : "/Users/millerding/Documents/Repos/aeapi/ae/logs"
 , "data_source"           : "/Users/millerding/Documents/Repos/aeapi/ae/temp.tsv"
-, "aep"                   : "/Users/millerding/Documents/Repos/aeapi/ae/transition.aep"
+, "aep"                   : "/Users/millerding/Documents/Repos/aeapi/ae/NewTemplate.aep"
 , "source_footage"        : "/Users/millerding/Documents/Repos/aeapi/ae/images"
 , "output_location"       : "/Users/millerding/Documents/Repos/aeapi/ae/output"
 , "render_settings"       : "Best Settings"
