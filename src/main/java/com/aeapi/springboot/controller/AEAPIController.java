@@ -57,14 +57,13 @@ public class AEAPIController {
 			File folder = new File("ae/images/"+requestId);
 			File[] listOfFiles = folder.listFiles();
 			for(File f : listOfFiles) {
-				files.add(requestId+f.getName());
+				files.add(requestId+"/"+f.getName());
 			}
 			if(files.size() > 1) {
 				log.info("Files output:");
 				for(String s : files) {
 					System.out.println(s);
 				}
-				return null;
 			}
 			aeService.create(files, template, image_count);
 			Path def = Paths.get("ae/output/Render_Comp 1_00002.mp4");
