@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -136,6 +137,25 @@ public class AEAPIController {
 	@GetMapping("templates")
 	public Map<String, Integer> getTemplates() {
 		return new AEServiceImpl().getTemplates();
+	}
+	private final String storageDir = "ae/images";
+	@PostMapping("uploadfiles")
+	public int uploadFiles(@RequestParam("images") List<MultipartFile> files, @RequestParam("request_id") String requestId) {
+		try {
+        log.info("Saving file.");
+        log.info("Trying to get requested dir, with requestID as {}", requestId);
+        Path requestDir = Paths.get(storageDir, requestId);
+        Files.createDirectories(requestDir);
+
+        for (MultipartFile file : files) {
+            Path filePath = requestDir.resolve(file.getOriginalFilename());
+            Files.copy(file.getInputStream(), filePath);
+        }
+
+		return 0;} catch(IOException ioe) {
+            log.error("IOException from fss");
+            return -1;
+        }
 	}
 
 	
