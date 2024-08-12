@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -25,7 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 import com.aeapi.springboot.service.AEService;
 import com.aeapi.springboot.service.impl.AEServiceImpl;
 
-import lombok.extern.log4j.Log4j;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -35,6 +35,7 @@ public class AEAPIController {
 	@Autowired
 	public static AEService aeService;
 
+	private final String storageDir = "ae/images";
 
 	@GetMapping("/")
 	public String index() {
@@ -71,21 +72,30 @@ public class AEAPIController {
 			Path ran = Paths.get("ae/output/"+randomName+".mp4");
 			Files.move(def, ran);
 
-			for(String file : files) {
-				Files.delete(Paths.get("ae/images/"+file));
+			//Delete files
+			try {
+				Path requestDir = Paths.get(storageDir, requestId);
+				Files.walk(requestDir)
+					.sorted(Comparator.reverseOrder())
+					.map(Path::toFile)
+					.forEach(File::delete);
+			} catch(IOException ioe) {
+				log.error("IOException from deleting");
 			}
+			
 			return aeService.getVideo(randomName+".mp4");
 
         } catch (IOException e) {
 			log.error("Unexpected error occured during the process.");
-			for(String file : files) {
 				try {
-					Files.delete(Paths.get("ae/images/"+file));
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				Path requestDir = Paths.get(storageDir, requestId);
+				Files.walk(requestDir)
+					.sorted(Comparator.reverseOrder())
+					.map(Path::toFile)
+					.forEach(File::delete);
+				} catch(IOException ioe) {
+					log.error("IOException from deleting");
 				}
-			}
         }
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
@@ -141,7 +151,7 @@ public class AEAPIController {
 	public Map<String, Integer> getTemplates() {
 		return new AEServiceImpl().getTemplates();
 	}
-	private final String storageDir = "ae/images";
+
 	@PostMapping("uploadfiles")
 	public int uploadFiles(@RequestParam("images") List<MultipartFile> files, @RequestParam("request_id") String requestId) {
 		try {
