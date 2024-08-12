@@ -142,8 +142,7 @@ public class AEAPIController {
 	@PostMapping("uploadfiles")
 	public int uploadFiles(@RequestParam("images") List<MultipartFile> files, @RequestParam("request_id") String requestId) {
 		try {
-        log.info("Saving file.");
-        log.info("Trying to get requested dir, with requestID as {}", requestId);
+			log.info("Received request with UUID: {}", requestId);
         Path requestDir = Paths.get(storageDir, requestId);
         Files.createDirectories(requestDir);
 
