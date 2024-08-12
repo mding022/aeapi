@@ -1,5 +1,6 @@
 package com.aeapi.springboot.controller;
 
+import java.io.File;
 import java.io.IOException;
 
 import java.nio.file.Files;
@@ -41,7 +42,7 @@ public class AEAPIController {
 	}
 
 	@PostMapping("/create")
-	public ResponseEntity<Resource> create(@RequestParam("images") List<MultipartFile> images, @RequestParam("template") String template) {
+	public ResponseEntity<Resource> create(@RequestParam("request_id") String requestId, @RequestParam("template") String template) {
         
 		aeService = new AEServiceImpl();
 		int image_count = 0;
@@ -53,14 +54,18 @@ public class AEAPIController {
 		log.info("Received request to create mp4 using template {} with {} inputs.", template, image_count);
 		List<String> files = new ArrayList<String>();
 		try {
-			
-
-			for(MultipartFile image : images) {
-				aeService.saveFile("ae/images/"+image.getOriginalFilename(), image);
-				files.add(image.getOriginalFilename());
+			File folder = new File("ae/images/"+requestId);
+			File[] listOfFiles = folder.listFiles();
+			for(File f : listOfFiles) {
+				files.add(requestId+f.getName());
 			}
-			
-
+			if(files.size() > 1) {
+				log.info("Files output:");
+				for(String s : files) {
+					System.out.println(s);
+				}
+				return null;
+			}
 			aeService.create(files, template, image_count);
 			Path def = Paths.get("ae/output/Render_Comp 1_00002.mp4");
 			String randomName = String.valueOf(ThreadLocalRandom.current().nextInt(1,1000000000));
@@ -86,52 +91,51 @@ public class AEAPIController {
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
 
-	@PostMapping("/create_gif")
-	public ResponseEntity<Resource> createGif(@RequestParam("images") List<MultipartFile> images, @RequestParam("template") String template) {
+	// public ResponseEntity<Resource> createGif(@RequestParam("template") String template) {
         
-		aeService = new AEServiceImpl();
-		int image_count = 0;
-		try{image_count = aeService.getTemplates().get(template);}
-		catch(Exception e) {
-			log.error("Unsuccessful request, template not found");
-			return null;
-		}
-		log.info("Received request to create gif using template {} with {} inputs.", template, image_count);
-		List<String> files = new ArrayList<String>();
-		try {
+	// 	aeService = new AEServiceImpl();
+	// 	int image_count = 0;
+	// 	try{image_count = aeService.getTemplates().get(template);}
+	// 	catch(Exception e) {
+	// 		log.error("Unsuccessful request, template not found");
+	// 		return null;
+	// 	}
+	// 	log.info("Received request to create gif using template {} with {} inputs.", template, image_count);
+	// 	List<String> files = new ArrayList<String>();
+	// 	try {
 			
 
-			for(MultipartFile image : images) {
-				aeService.saveFile("ae/images/"+image.getOriginalFilename(), image);
-				files.add(image.getOriginalFilename());
-			}
+	// 		for(MultipartFile image : images) {
+	// 			aeService.saveFile("ae/images/"+image.getOriginalFilename(), image);
+	// 			files.add(image.getOriginalFilename());
+	// 		}
 			
 
-			aeService.create(files, template, image_count);
-			Path def = Paths.get("ae/output/Render_Comp 1_00002.mp4");
-			String randomName = String.valueOf(ThreadLocalRandom.current().nextInt(1,1000000000));
-			Path ran = Paths.get("ae/output/"+randomName+".mp4");
-			Files.move(def, ran);
+	// 		aeService.create(files, template, image_count);
+	// 		Path def = Paths.get("ae/output/Render_Comp 1_00002.mp4");
+	// 		String randomName = String.valueOf(ThreadLocalRandom.current().nextInt(1,1000000000));
+	// 		Path ran = Paths.get("ae/output/"+randomName+".mp4");
+	// 		Files.move(def, ran);
 
-			for(String file : files) {
-				Files.delete(Paths.get("ae/images/"+file));
-			}
-			aeService.ffmpeg("ae/output/"+randomName+".mp4", "ae/output/"+randomName+".gif");
-			log.info("File: {}", randomName+".gif");
-			return aeService.getGif(randomName+".gif");
-        } catch (IOException e) {
-			log.error("Unexpected error occured during the process.");
-			for(String file : files) {
-				try {
-					Files.delete(Paths.get("ae/images/"+file));
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-        }
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-    }
+	// 		for(String file : files) {
+	// 			Files.delete(Paths.get("ae/images/"+file));
+	// 		}
+	// 		aeService.ffmpeg("ae/output/"+randomName+".mp4", "ae/output/"+randomName+".gif");
+	// 		log.info("File: {}", randomName+".gif");
+	// 		return aeService.getGif(randomName+".gif");
+    //     } catch (IOException e) {
+	// 		log.error("Unexpected error occured during the process.");
+	// 		for(String file : files) {
+	// 			try {
+	// 				Files.delete(Paths.get("ae/images/"+file));
+	// 			} catch (IOException e1) {
+	// 				// TODO Auto-generated catch block
+	// 				e1.printStackTrace();
+	// 			}
+	// 		}
+    //     }
+	// 	return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    // }
 
 
 	@GetMapping("templates")
@@ -143,8 +147,8 @@ public class AEAPIController {
 	public int uploadFiles(@RequestParam("images") List<MultipartFile> files, @RequestParam("request_id") String requestId) {
 		try {
 			log.info("Received request with UUID: {}", requestId);
-        Path requestDir = Paths.get(storageDir, requestId);
-        Files.createDirectories(requestDir);
+			Path requestDir = Paths.get(storageDir, requestId);
+			Files.createDirectories(requestDir);
 
         for (MultipartFile file : files) {
             Path filePath = requestDir.resolve(file.getOriginalFilename());
