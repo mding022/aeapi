@@ -44,6 +44,11 @@ public class AEAPIController {
 		return "Success";
 	}
 
+	@GetMapping("/temp")
+	public String showTemplates() {
+		return "transition.aep";
+	}
+
 	@PostMapping("/create")
 	public ResponseEntity<Resource> create(@RequestParam("request_id") String requestId, @RequestParam("template") String template) {
         
