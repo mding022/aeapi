@@ -1,6 +1,8 @@
 package com.aeapi.springboot.controller;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
 import java.nio.file.Files;
@@ -14,6 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,7 +49,8 @@ public class AEAPIController {
 
 	@GetMapping("/temp")
 	public String showTemplates() {
-		return "After Effects Templates#transition.aep#NewTemplate.aep#filler.aep";
+		try{BufferedReader br = new BufferedReader(new FileReader("ae/resources/templates.txt"));
+		String s = br.readLine(); br.close(); return s;} catch(Exception e) {return "Error reading file";}
 	}
 
 	@PostMapping("/create")
