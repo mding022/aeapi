@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @Slf4j
-@CrossOrigin(origins = {"http://localhost:3000", "https://millerding.com"})
+@CrossOrigin(origins = {"http://localhost:3000", "https://millerding.com", "https://tunnel.millerding.com"})
 public class AEAPIController {
 
 	@Autowired
@@ -46,7 +46,7 @@ public class AEAPIController {
 
 	@GetMapping("/temp")
 	public String showTemplates() {
-		return "transition.aep";
+		return "After Effects Templates#transition.aep#NewTemplate.aep#filler.aep";
 	}
 
 	@PostMapping("/create")
