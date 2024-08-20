@@ -47,9 +47,14 @@ public class AEAPIController {
 		return "Success";
 	}
 
-	@GetMapping("/temp")
-	public String showTemplates() {
+	@GetMapping("/aedata")
+	public String aeTenokates() {
 		try{BufferedReader br = new BufferedReader(new FileReader("ae/resources/templates.txt"));
+		String s = br.readLine(); br.close(); return s;} catch(Exception e) {return "Error reading file";}
+	}
+	@GetMapping("/fsdata")
+	public String fsTemplates() {
+		try{BufferedReader br = new BufferedReader(new FileReader("ae/resources/fstemplates.txt"));
 		String s = br.readLine(); br.close(); return s;} catch(Exception e) {return "Error reading file";}
 	}
 
