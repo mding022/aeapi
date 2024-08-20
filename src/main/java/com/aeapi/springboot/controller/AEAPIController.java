@@ -57,6 +57,21 @@ public class AEAPIController {
 		try{BufferedReader br = new BufferedReader(new FileReader("ae/resources/fstemplates.txt"));
 		String s = br.readLine(); br.close(); return s;} catch(Exception e) {return "Error reading file";}
 	}
+	@GetMapping("/fsvdata")
+	public String fsvTemplates() {
+		try{BufferedReader br = new BufferedReader(new FileReader("ae/resources/fsvtemplates.txt"));
+		String s = br.readLine(); br.close(); return s;} catch(Exception e) {return "Error reading file";}
+	}
+	@GetMapping("/aiedata")
+	public String aieData() {
+		try{BufferedReader br = new BufferedReader(new FileReader("ae/resources/fstemplates.txt"));
+		String s = br.readLine(); br.close(); return s;} catch(Exception e) {return "Error reading file";}
+	}
+	@GetMapping("/rbgdata")
+	public String rbgData() {
+		try{BufferedReader br = new BufferedReader(new FileReader("ae/resources/fstemplates.txt"));
+		String s = br.readLine(); br.close(); return s;} catch(Exception e) {return "Error reading file";}
+	}
 
 	@PostMapping("/create")
 	public ResponseEntity<Resource> create(@RequestParam("request_id") String requestId, @RequestParam("template") String template) {
